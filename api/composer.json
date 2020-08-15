@@ -1,0 +1,12 @@
+{
+    "name": "meitar/api",
+    "authors": [
+        {
+            "name": "Meitar Keren",
+            "email": "meitark@gmail.com"
+        }
+    ],
+    "require": {
+        "firebase/php-jwt": "^5.2"
+    }
+}

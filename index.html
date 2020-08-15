@@ -1,0 +1,47 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Live Users Dashboard - Login</title>
+    <meta name="description" content="Live Users Dashboard - Login">
+    <meta name="author" content="Meitar">
+
+    <link rel="stylesheet" href="css/index.css?v=1.0">
+
+</head>
+
+<body>
+    <div class="login-box">
+        <div class="e-login e-account-form">
+            <h2>Log In</h2>
+            <p>New to Live Users Dashboard? <a href="register.html">Create an Account</a></p>
+            <form class="elementor-form elementor-login-ajax-form-action" method="post" action="">
+                <input type="hidden" name="action" value="login">
+                <input type="hidden" name="redirect_to" value="/">
+
+                <div class="elementor-form-fields-wrapper">
+
+                    <div class="elementor-field-group e-field-email elementor-column">
+                        <input class="input-field" id="login-input-email" type="text" name="email" placeholder="Email" required>
+                    </div>
+
+                    <div class="elementor-field-group e-field-password elementor-column">
+                        <input class="input-field" id="login-input-password" type="password" name="password" placeholder="Password" required>
+                    </div>
+                    <div class="">
+                        <button type="submit" class="login-button">Log In</button>
+                    </div>
+                </div>
+            </form>
+
+            <p class="note-redirect">
+                <a href="#">Forgot Password?</a> </p>
+        </div>
+    </div>
+    <script src="js/scripts.js"></script>
+</body>
+
+</html>
