@@ -18,21 +18,21 @@
         <div class="e-login e-account-form">
             <h2>Register</h2>
             <p>Already Registered? <a href="index.html">Login</a></p>
-            <form class="elementor-form elementor-login-ajax-form-action" method="post" action="">
+            <form id="formRegistration" class="" method="post" action="">
                 <input type="hidden" name="action" value="login">
                 <input type="hidden" name="redirect_to" value="/">
 
-                <div class="elementor-form-fields-wrapper">
+                <div class="">
 
-                    <div class="elementor-field-group e-field-email elementor-column">
-                        <input class="input-field" id="login-input-email" type="text" name="email" placeholder="Email" required>
+                    <div class="">
+                        <input class="input-field" id="login-input-email" type="text" name="username" placeholder="Email" autocomplete="email" required>
                     </div>
 
-                    <div class="elementor-field-group e-field-password elementor-column">
-                        <input class="input-field" id="login-input-password" type="password" name="password" placeholder="Password" required>
+                    <div class="">
+                        <input class="input-field" id="login-input-password" type="password" name="password" placeholder="Password" autocomplete="current-password" required>
                     </div>
                     <div class="">
-                        <button type="submit" class="login-button">Log In</button>
+                        <button id="registerBtn" type="button" class="register-button">Register</button>
                     </div>
                 </div>
             </form>

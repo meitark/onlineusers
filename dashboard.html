@@ -19,17 +19,17 @@
    </header>
    <nav>
        <div class="logout-button">
-           <a href="">Logout</a>
+           <a href="#" id="logoutBtn">Logout</a>
        </div>
    </nav>
    <section>
-        <h2>Online Users (Last Updated On xxxxxxx):</h2>
+        <h2>Online Users:</h2>
         <div class="users-list-titles">
             <div>Username</div>
             <div>Login Time</div>
             <div>User IP</div>
         </div>
-        <div class="users-list">
+        <div id="users-list" class="users-list">
 
             <div class="user">
                 <div>testtest</div>
@@ -38,7 +38,15 @@
             </div>
        </div>
    </section>
+   <div id="userModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span id="userModalClose" class="close">&times;</span>
+      <p id="modalContent"></p>
+    </div>
+  </div>
     <script src="js/scripts.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 
 </html>

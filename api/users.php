@@ -1,6 +1,7 @@
 <?php
 
 require_once "db.php";
+
 use \Firebase\JWT\JWT;
 
 
@@ -21,38 +22,41 @@ class Users
         $requestMethod = $_SERVER["REQUEST_METHOD"];
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $uri = explode('/', $uri);
-        if ($uri[1] != 'user') {
+        if ($uri[1] != 'api' || $uri[2] != 'user') {
             header("HTTP/1.1 404 Not Found");
             exit();
         }
         if ($requestMethod == 'GET') {
-            switch ($uri[2]) {
+            switch ($uri[3]) {
                 case 'getlive':
                     $this->authenticate();
                     $this->getliveHandler();
-                break;
-                
+                    break;
+                case 'getLiveUser':
+                    $this->authenticate();
+                    $this->getLiveUserHandler();
+                    break;
                 default:
                     # code...
                     break;
             }
         }
         if ($requestMethod ==  'POST') {
-            switch ($uri[2]) {
+            switch ($uri[3]) {
                 case 'register':
                     $this->registerHandler();
                     break;
                 case 'login':
                     $this->loginHandler();
-                break;
+                    break;
                 case 'getlive':
                     $this->authenticate();
                     $this->getliveHandler();
-                break;
+                    break;
                 case 'logout':
                     $this->authenticate();
                     $this->logoutHandler();
-                break;
+                    break;
                 default:
                     # code...
                     break;
@@ -82,14 +86,16 @@ class Users
         exit();
     }
 
-    public function unauthorizedResponse() {
+    public function unauthorizedResponse()
+    {
         $res = [
             'error' => 'Unauthorized'
         ];
         $this->response(401, $res);
     }
 
-    public function invalidInputResponse() {
+    public function invalidInputResponse()
+    {
         $res = [
             'error' => 'Invalid input'
         ];
@@ -106,7 +112,7 @@ class Users
         $res = $this->register($username, $password);
         if ($res) {
             $this->response(200, $res);
-        } else {            
+        } else {
             //TODO: return the right error
             $this->response(500, $res);
         }
@@ -168,12 +174,9 @@ class Users
         if (false === $liveUsers) {
             $liveUsers = [];
         }
-        if (!isset($liveUsers[$user['username']])) {
-            //first time we update the list, meaning the context is login
-            $user['login_time'] = date('Y-m-d h:i:sa');
-        }
         $user['updated_at'] = date('Y-m-d h:i:sa');
         $user['ip'] = $this->get_ip_address();
+        $user['ua'] = $_SERVER['HTTP_USER_AGENT'];
         //TODO: move record fields to a class of it's own for better refactoring
         $liveUsers[$user['username']] = $user;
         $liveUsers = $this->checkForTimeoutUsers($liveUsers);
@@ -210,38 +213,71 @@ class Users
         return $regUsers[$username];
     }
 
-    public function authenticate() {        
-        $username = isset($_REQUEST['username'])? $_REQUEST['username']: '';
+    public function getLiveUsers()
+    {
+        $dbLiveUsers = new DB(Users::LIVE_USERS_DB);
+        $liveUsers = $dbLiveUsers->read();
+        return $liveUsers;
+    }
+
+    public function getLiveUser($username)
+    {
+        if (empty($username)) {
+            return false;
+        }
+        $liveUsers = $this->getLiveUsers();
+        if (false == $liveUsers) {
+            return false;
+        }
+        if (!isset($liveUsers[$username])) {
+            return false;
+        }
+        return $liveUsers[$username];
+    }
+
+    public function getLiveUserHandler()
+    {
+        if (empty($_REQUEST['requested_user'])) {
+            $this->invalidInputResponse();
+        }
+        $res = $this->getLiveUser($_REQUEST['requested_user']);
+        $this->response(200, $res);
+    }
+
+    public function authenticate()
+    {
+        $username = isset($_REQUEST['username']) ? $_REQUEST['username'] : '';
         if (empty($username)) {
             $this->unauthorizedResponse();
         }
-            try {
-                switch(true) {
-                    case array_key_exists('HTTP_AUTHORIZATION', $_SERVER) :
-                        $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
-                        break;
-                    case array_key_exists('Authorization', $_SERVER) :
-                        $authHeader = $_SERVER['Authorization'];
-                        break;
-                    default :
-                        $authHeader = null;
-                        break;
-                }
-                preg_match('/Bearer\s(\S+)/', $authHeader, $matches);
-                if(!isset($matches[1])) {
-                    throw new \Exception('No Bearer Token');
-                }
-                $decoded = JWT::decode($matches[1], self::JWT_KEY, array('HS256'));                                
-                if ($decoded == $username) {
-                    return true;
-                }
-                return false;
-            } catch (\Exception $e) {
-                return false;
+        try {
+            switch (true) {
+                case array_key_exists('HTTP_AUTHORIZATION', $_SERVER):
+                    $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+                    break;
+                case array_key_exists('Authorization', $_SERVER):
+                    $authHeader = $_SERVER['Authorization'];
+                    break;
+                default:
+                    $authHeader = null;
+                    break;
             }
+            preg_match('/Bearer\s(\S+)/', $authHeader, $matches);
+            if (!isset($matches[1])) {
+                throw new \Exception('No Bearer Token');
+            }
+            $decoded = JWT::decode($matches[1], self::JWT_KEY, array('HS256'));
+            if ($decoded == $username) {
+                return true;
+            }
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
-    public function loginHandler() {
+    public function loginHandler()
+    {
         if (empty($_POST['username']) || empty($_POST['password'])) {
             $this->invalidInputResponse();
         }
@@ -276,6 +312,7 @@ class Users
         $verified = password_verify($password, $user['password']);
         if ($verified) {
             $user['logins']++;
+            $user['login_time'] = date('Y-m-d h:i:sa');
             $regUsers[$username] = $user;
             $res = $this->setRegisteredUsers($regUsers);
             $res = $this->updateUserInLiveList($user);
@@ -289,10 +326,11 @@ class Users
         return false;
     }
 
-    public function logoutHandler() {
+    public function logoutHandler()
+    {
         $username = $_REQUEST['username'];
         $res = $this->logout($username);
-        $this->response(200,$res);
+        $this->response(200, $res);
     }
 
     public function logout($username)
@@ -311,10 +349,11 @@ class Users
         return true;
     }
 
-    public function getliveHandler() {
+    public function getliveHandler()
+    {
         $username = $_REQUEST['username'];
         $res = $this->getUpdateLiveUsers($username);
-        $this->response(200,$res);
+        $this->response(200, $res);
     }
 
     /**
