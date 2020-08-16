@@ -2,6 +2,7 @@ import { common } from "./common.js";
 (async function () {
     switch (common.getPage()) {
         case 'index.html':        
+        case '':
                 let {login} = await import("./login.js");
                 login.initEventHandlers();
             break;
@@ -15,8 +16,6 @@ import { common } from "./common.js";
             break;            
     
         default:
-            let {login} = await import("./login.js");
-            login.initEventHandlers();            
             break;
     }    
 }());
