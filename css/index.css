@@ -50,6 +50,22 @@ button {
 .users-list-titles div, .user div {
     padding: 10px;
     display: inline-block;
+    width: 20%;
+}
+
+.users-list-titles {
+    max-width: 802px;
+    background: rgba(112, 128, 144, 0.2);
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.user {
+    max-width: 800px;
+    border: solid 1px grey;
+    cursor: pointer;
+    display: flex;
+  flex-wrap: wrap;
 }
 
 /* The Modal (background) */
