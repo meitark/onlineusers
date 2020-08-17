@@ -59,12 +59,15 @@ export let dashboard = {
         }
     },
 
-    initEventHandlers: function () {
+    initEventHandlers: function () {        
         dashboard.updateLiveUsersList();
         setInterval(async () => {
             dashboard.updateLiveUsersList();
         }, 3000);
-
+        var welcomemsg = document.getElementById("welcomemsg");
+        if (welcomemsg) {
+            welcomemsg.innerText = "Welcome " + common.getCookie("username");
+        }
 
         var logoutBtn = document.getElementById("logoutBtn");
         if (logoutBtn) {
